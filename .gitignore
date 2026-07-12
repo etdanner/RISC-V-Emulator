@@ -1,0 +1,17 @@
+# Build artifacts
+*.o
+*.d
+emu
+
+# Tooling
+compile_commands.json
+.cache/
+
+# Test outputs
+tests/**/*.o
+tests/**/*.elf
+tests/**/*.bin
+
+# Editor / OS
+.vscode/
+.DS_Store

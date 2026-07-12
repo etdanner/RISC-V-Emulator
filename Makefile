@@ -10,7 +10,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 -include $(DEP)
 
@@ -20,4 +20,7 @@ debug: clean $(TARGET)
 clean:
 	rm -f src/*.o src/*.d $(TARGET)
 
-.PHONY: clean debug
+run: $(TARGET)
+	./$(TARGET) $(ARGS)
+
+.PHONY: clean debug run

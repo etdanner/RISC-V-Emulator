@@ -3,10 +3,10 @@
 
 typedef enum {
   TRAP_NONE = -1,              // Executed correctly (nothing happened)
-  TRAP_INSN_MISALIGNED = 0,    // Target isn't 4-byte aligned
-  TRAP_INSN_ACCESS_FAULT = 1,  // Failed instruction fetch
-  TRAP_ILLEGAL_INSN = 2,       // Illegal instruction: decode failed
-  TRAP_BREAKPOINT = 3,         // Breakpoint called by ebreak insn
+  TRAP_INSTR_MISALIGNED = 0,   // Target isn't 4-byte aligned
+  TRAP_INSTR_ACCESS_FAULT = 1, // Failed instruction fetch
+  TRAP_ILLEGAL_INSTR = 2,      // Illegal instruction: decode failed
+  TRAP_BREAKPOINT = 3,         // Breakpoint called by ebreak instr
   TRAP_LOAD_MISALIGNED = 4,    // Load addr missaligned
   TRAP_LOAD_ACCESS_FAULT = 5,  // load outside physical mem
   TRAP_STORE_MISALIGNED = 6,   // store addr missaligned
@@ -49,10 +49,10 @@ static trap_cause_t mem_write32(uint32_t addr, uint32_t in) {
 int main(void) {
   mem_write32(0, 0x00500093); // addi x1, x0, 5
 
-  uint32_t inst;
-  trap_cause_t res = mem_read32(pc, &inst);
+  uint32_t instr;
+  trap_cause_t res = mem_read32(pc, &instr);
   if (res == TRAP_NONE) {
-    printf("pc=0x%08x inst=0x%08x\n", pc, inst);
+    printf("pc=0x%08x inst=0x%08x\n", pc, instr);
   } else {
     fprintf(stderr, "trap %d reading pc=%08x\n", res, pc);
   }

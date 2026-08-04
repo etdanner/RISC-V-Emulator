@@ -46,7 +46,13 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
     default: // illegal I-Format instruction
       return TRAP_ILLEGAL_INSTR;
     }
-    break; // end of I-Format
+    break;   // end of I-Format
+  case 0x37: // lui
+    reg_write(cpu, d.rd, d.imm);
+    break;
+  case 0x17: // auipc
+    reg_write(cpu, d.rd, cpu->pc + d.imm);
+    break;
   default:
     return TRAP_ILLEGAL_INSTR;
   }

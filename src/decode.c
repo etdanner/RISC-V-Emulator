@@ -15,7 +15,15 @@ decoded_instr_t decode(uint32_t instr) {
   d.rs2 = bits(instr, 20, 24);
   d.funct7 = bits(instr, 25, 31);
   // sign-extended, only for I-type immediate atm.
-  d.imm = (int32_t)instr >> 20;
+  switch (d.opcode) {
+  case 0x13: // I-format imm
+    d.imm = (int32_t)instr >> 20;
+    break;
+  case 0x37: // U-format imm
+  case 0x17:
+    d.imm = (int32_t)(instr & 0xFFFFF000);
+    break;
+  }
 
   return d;
 }

@@ -46,13 +46,32 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
     default: // illegal I-Format instruction
       return TRAP_ILLEGAL_INSTR;
     }
-    break;   // end of I-Format
+    break; // end of I-Format
+
   case 0x37: // lui
     reg_write(cpu, d.rd, d.imm);
     break;
+
   case 0x17: // auipc
     reg_write(cpu, d.rd, cpu->pc + d.imm);
     break;
+
+  case 0x33: // R-format
+    switch (d.funct3) {
+    case 0x0:
+      if (d.funct7 == 0x00) { // add
+
+      } else if (d.funct7 == 0x20) { // sub
+
+      } else {
+        return TRAP_ILLEGAL_INSTR;
+      }
+      break;
+    default: // invalid R-Format instruction
+      return TRAP_ILLEGAL_INSTR;
+    }
+    break; // end of R-format
+
   default:
     return TRAP_ILLEGAL_INSTR;
   }

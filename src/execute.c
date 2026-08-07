@@ -25,7 +25,7 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
       }
       break;
     }
-    case 0x5: { // braces to give scope for dec
+    case 0x5: { // braces to give scope for shamt
       uint32_t shamt = d.imm & 0x1F;
       if (d.funct7 == 0x00) { // srli
         reg_write(cpu, d.rd, cpu->regs[d.rs1] >> shamt);
@@ -41,7 +41,7 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
                 ((int32_t)cpu->regs[d.rs1] < (int32_t)d.imm) ? 1 : 0);
       break;
     case 0x3: // sltiu
-      reg_write(cpu, d.rd, (cpu->regs[d.rs1] < (uint32_t)d.imm) ? 1 : 0);
+      reg_write(cpu, d.rd, (cpu->regs[d.rs1] < d.imm) ? 1 : 0);
       break;
     default: // illegal I-Format instruction
       return TRAP_ILLEGAL_INSTR;
@@ -60,12 +60,45 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
     switch (d.funct3) {
     case 0x0:
       if (d.funct7 == 0x00) { // add
-
+        reg_write(cpu, d.rd, cpu->regs[d.rs1] + cpu->regs[d.rs2]);
       } else if (d.funct7 == 0x20) { // sub
-
+        reg_write(cpu, d.rd, cpu->regs[d.rs1] - cpu->regs[d.rs2]);
       } else {
         return TRAP_ILLEGAL_INSTR;
       }
+      break;
+    case 0x4: // xor
+      reg_write(cpu, d.rd, cpu->regs[d.rs1] ^ cpu->regs[d.rs2]);
+      break;
+    case 0x6: // or
+      reg_write(cpu, d.rd, cpu->regs[d.rs1] | cpu->regs[d.rs2]);
+      break;
+    case 0x7: // and
+      reg_write(cpu, d.rd, cpu->regs[d.rs1] & cpu->regs[d.rs2]);
+      break;
+    case 0x1: { // sll
+      uint32_t shamt = cpu->regs[d.rs2] & 0x1F;
+      reg_write(cpu, d.rd, cpu->regs[d.rs1] << shamt);
+      break;
+    }
+    case 0x5: {
+      uint32_t shamt = cpu->regs[d.rs2] & 0x1F;
+      if (d.funct7 == 0x00) { // srl
+        reg_write(cpu, d.rd, cpu->regs[d.rs1] >> shamt);
+      } else if (d.funct7 == 0x20) { // sra
+        reg_write(cpu, d.rd, (uint32_t)((int32_t)cpu->regs[d.rs1] >> shamt));
+      } else {
+        return TRAP_ILLEGAL_INSTR;
+      }
+      break;
+    }
+    case 0x2: // slt
+      reg_write(cpu, d.rd,
+                ((int32_t)cpu->regs[d.rs1] < (int32_t)cpu->regs[d.rs2]) ? 1
+                                                                        : 0);
+      break;
+    case 0x3: // sltu
+      reg_write(cpu, d.rd, (cpu->regs[d.rs1] < cpu->regs[d.rs2]) ? 1 : 0);
       break;
     default: // invalid R-Format instruction
       return TRAP_ILLEGAL_INSTR;

@@ -37,11 +37,10 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
       break;
     }
     case 0x2: // slti
-      reg_write(cpu, d.rd,
-                ((int32_t)cpu->regs[d.rs1] < (int32_t)d.imm) ? 1 : 0);
+      reg_write(cpu, d.rd, ((int32_t)cpu->regs[d.rs1] < d.imm) ? 1 : 0);
       break;
     case 0x3: // sltiu
-      reg_write(cpu, d.rd, (cpu->regs[d.rs1] < d.imm) ? 1 : 0);
+      reg_write(cpu, d.rd, (cpu->regs[d.rs1] < (uint32_t)d.imm) ? 1 : 0);
       break;
     default: // illegal I-Format instruction
       return TRAP_ILLEGAL_INSTR;
@@ -104,6 +103,20 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
       return TRAP_ILLEGAL_INSTR;
     }
     break; // end of R-format
+
+  case 0x73: // SYSTEM
+    switch (d.funct3) {
+    case 0x0:
+      if (d.imm == 0x0) {
+        return TRAP_ECALL_M; // ecall
+      } else if (d.imm == 0x1) {
+        return TRAP_BREAKPOINT; // ebreak
+      } else {
+        return TRAP_ILLEGAL_INSTR;
+      }
+    default:
+      return TRAP_ILLEGAL_INSTR;
+    }
 
   default:
     return TRAP_ILLEGAL_INSTR;

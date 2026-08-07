@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include <stdio.h>
+#include <string.h>
 
 #define START_ADDR 0x00000000
 

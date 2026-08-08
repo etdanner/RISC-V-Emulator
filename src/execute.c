@@ -104,6 +104,78 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
     }
     break; // end of R-format
 
+  case 0x23: // S-format
+    switch (d.funct3) {
+    case 0x0: { // sb
+      trap_cause_t t = mem_write8(cpu->regs[d.rs1] + d.imm, cpu->regs[d.rs2]);
+      if (t != TRAP_NONE)
+        return t;
+      break;
+    }
+    case 0x1: { // sh
+      trap_cause_t t = mem_write16(cpu->regs[d.rs1] + d.imm, cpu->regs[d.rs2]);
+      if (t != TRAP_NONE)
+        return t;
+      break;
+    }
+    case 0x2: { // sw
+      trap_cause_t t = mem_write32(cpu->regs[d.rs1] + d.imm, cpu->regs[d.rs2]);
+      if (t != TRAP_NONE)
+        return t;
+      break;
+    }
+    default:
+      return TRAP_ILLEGAL_INSTR;
+    }
+    break; // end of S-format
+
+  case 0x3: // load funcs
+    switch (d.funct3) {
+    case 0x0: { // lb
+      uint32_t val;
+      trap_cause_t t = mem_read8(cpu->regs[d.rs1] + d.imm, &val);
+      if (t != TRAP_NONE)
+        return t;
+      reg_write(cpu, d.rd, (uint32_t)(int32_t)(int8_t)val); // sign-extends
+      break;
+    }
+    case 0x1: { // lh
+      uint32_t val;
+      trap_cause_t t = mem_read16(cpu->regs[d.rs1] + d.imm, &val);
+      if (t != TRAP_NONE)
+        return t;
+      reg_write(cpu, d.rd, (uint32_t)(int32_t)(int16_t)val); // sign-extends
+      break;
+    }
+    case 0x2: { // lw
+      uint32_t val;
+      trap_cause_t t = mem_read32(cpu->regs[d.rs1] + d.imm, &val);
+      if (t != TRAP_NONE)
+        return t;
+      reg_write(cpu, d.rd, val); // no extension
+      break;
+    }
+    case 0x4: { // lbu
+      uint32_t val;
+      trap_cause_t t = mem_read8(cpu->regs[d.rs1] + d.imm, &val);
+      if (t != TRAP_NONE)
+        return t;
+      reg_write(cpu, d.rd, val); // no-sign-extends
+      break;
+    }
+    case 0x5: { // lhu
+      uint32_t val;
+      trap_cause_t t = mem_read16(cpu->regs[d.rs1] + d.imm, &val);
+      if (t != TRAP_NONE)
+        return t;
+      reg_write(cpu, d.rd, val); // no-sign-extends
+      break;
+    }
+    default:
+      return TRAP_ILLEGAL_INSTR;
+    }
+    break; // end of load
+
   case 0x73: // SYSTEM
     switch (d.funct3) {
     case 0x0:

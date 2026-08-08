@@ -2,7 +2,7 @@
 
 static uint8_t mem[MEM_SIZE];
 
-// size must be a power of two (1, 2, or 4); the alignment mask assumes it.
+// size must be a power of two (1, 2, or 4). the alignment mask assumes it
 static trap_cause_t mem_read(uint32_t addr, uint32_t size, uint32_t *out) {
   if (addr & (size - 1))
     return TRAP_LOAD_MISALIGNED;

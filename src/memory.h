@@ -2,9 +2,14 @@
 #define MEMORY_H
 
 #include "trap.h"
+#include <stdbool.h>
+#include <stddef.h> // size_t
 #include <stdint.h>
+#include <string.h>
 
 #define MEM_SIZE (1024 * 1024)
+
+bool mem_load(const uint8_t *buf, size_t len, uint32_t addr);
 
 trap_cause_t mem_read8(uint32_t addr, uint32_t *out);
 trap_cause_t mem_read16(uint32_t addr, uint32_t *out);

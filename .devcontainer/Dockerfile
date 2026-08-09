@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y gcc-riscv64-unknown-elf \
     gcc \
     g++ \
     gdb \
@@ -14,8 +14,6 @@ RUN apt-get update && apt-get install -y \
     ltrace \
     bear \
     git \
-    gcc-riscv64-unknown-elf \
-    binutils-riscv64-unknown-elf \
     device-tree-compiler \
     && rm -rf /var/lib/apt/lists/*
 

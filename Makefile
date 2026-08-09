@@ -5,6 +5,9 @@ TARGET   := emu
 SRC      := $(wildcard src/*.c)
 OBJ      := $(SRC:.c=.o)
 DEP      := $(OBJ:.o=.d)
+RVAS    := riscv64-unknown-elf-as
+RVCPY   := riscv64-unknown-elf-objcopy
+RVFLAGS := -march=rv32i -mabi=ilp32
 
 $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -19,8 +22,18 @@ debug: clean $(TARGET)
 
 clean:
 	rm -f src/*.o src/*.d $(TARGET)
+	rm -rf tests/bin
 
 run: $(TARGET)
 	./$(TARGET) $(ARGS)
 
-.PHONY: clean debug run
+test: tests/bin/loadstore.bin $(TARGET)
+	./$(TARGET) tests/bin/loadstore.bin
+
+tests/bin/%.bin: tests/asm/%.s
+	@mkdir -p tests/bin
+	$(RVAS) $(RVFLAGS) $< -o $@.o
+	$(RVCPY) -O binary $@.o $@
+	@rm -f $@.o
+
+.PHONY: clean debug run test

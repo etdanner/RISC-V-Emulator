@@ -2,6 +2,13 @@
 
 static uint8_t mem[MEM_SIZE];
 
+bool mem_load(const uint8_t *buf, size_t len, uint32_t addr) {
+  if (len > MEM_SIZE || addr > MEM_SIZE - len)
+    return false;
+  memcpy(&mem[addr], buf, len);
+  return true;
+}
+
 // size must be a power of two (1, 2, or 4). the alignment mask assumes it
 static trap_cause_t mem_read(uint32_t addr, uint32_t size, uint32_t *out) {
   if (addr & (size - 1))

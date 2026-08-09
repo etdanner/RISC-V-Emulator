@@ -11,6 +11,7 @@ compile_commands.json
 tests/**/*.o
 tests/**/*.elf
 tests/**/*.bin
+tests/bin/
 
 # Editor / OS
 .vscode/

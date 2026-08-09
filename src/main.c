@@ -3,26 +3,57 @@
 #include "execute.h"
 #include "memory.h"
 #include "trap.h"
+#include <errno.h>
 #include <stdio.h>
+#include <stdlib.h> // malloc, free
+#include <string.h>
 
-static void load_program(const uint32_t *prog, size_t n) {
-  for (size_t i = 0; i < n; i++) {
-    mem_write32(i * 4, prog[i]);
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    fprintf(stderr, "usage: %s <program.bin>\n", argv[0]);
+    return 1;
   }
-}
 
-uint32_t prog[] = {
-    0x00A00093, // addi x1, x0, 10
-    0x00300113, // addi x2, x0, 3
-    0x002081B3, // add  x3, x1, x2
-    0x00100073, // ebreak
-};
+  FILE *f = fopen(argv[1], "rb");
+  if (f == NULL) {
+    fprintf(stderr, "error opening '%s': %s\n", argv[1], strerror(errno));
+    return 1;
+    return 1;
+  }
 
-int main(void) {
+  fseek(f, 0, SEEK_END);
+  long size = ftell(f);
+  if (size < 0) {
+    fprintf(stderr, "ftell failed\n");
+    fclose(f);
+    return 1;
+  }
+  fseek(f, 0, SEEK_SET);
+
+  uint8_t *buf = malloc(size);
+  if (buf == NULL) {
+    fprintf(stderr, "out of mem\n");
+    fclose(f);
+    return 1;
+  }
+
+  if (fread(buf, 1, size, f) != (size_t)size) {
+    fprintf(stderr, "read fewer bytes than expected\n");
+    free(buf);
+    fclose(f);
+    return 1;
+  }
+  fclose(f);
+
+  if (mem_load(buf, size, 0) == false) {
+    fprintf(stderr, "buf too big for mem\n");
+    free(buf);
+    return 1;
+  }
+  free(buf);
 
   cpu_t cpu;
   cpu_init(&cpu);
-  load_program(prog, sizeof prog / sizeof prog[0]);
 
   for (;;) {
     uint32_t raw;

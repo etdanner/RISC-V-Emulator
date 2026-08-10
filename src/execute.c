@@ -176,6 +176,37 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
     }
     break; // end of load
 
+  case 0x63: {
+    bool taken = false;
+    switch (d.funct3) {
+    case 0x0: // beq
+      taken = (cpu->regs[d.rs1] == cpu->regs[d.rs2]);
+      break;
+    case 0x1: // bne
+      taken = (cpu->regs[d.rs1] != cpu->regs[d.rs2]);
+      break;
+    case 0x4: // blt
+      taken = ((int32_t)cpu->regs[d.rs1] < (int32_t)cpu->regs[d.rs2]);
+      break;
+    case 0x5: // bge
+      taken = ((int32_t)cpu->regs[d.rs1] >= (int32_t)cpu->regs[d.rs2]);
+      break;
+    case 0x6: // bltu
+      taken = (cpu->regs[d.rs1] < cpu->regs[d.rs2]);
+      break;
+    case 0x7: // bgeu
+      taken = (cpu->regs[d.rs1] >= cpu->regs[d.rs2]);
+      break;
+    default:
+      return TRAP_ILLEGAL_INSTR;
+    }
+    if (taken) {
+      cpu->pc += d.imm;
+      return TRAP_NONE; // taken only
+    }
+    break; // not taken -> shared pc += 4
+  }
+
   case 0x73: // SYSTEM
     switch (d.funct3) {
     case 0x0:

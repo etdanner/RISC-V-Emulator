@@ -2,6 +2,7 @@
 #include "decode.h"
 #include "execute.h"
 #include "memory.h"
+#include "syscall.h"
 #include "trap.h"
 #include <errno.h>
 #include <stdio.h>
@@ -17,7 +18,6 @@ int main(int argc, char **argv) {
   FILE *f = fopen(argv[1], "rb");
   if (f == NULL) {
     fprintf(stderr, "error opening '%s': %s\n", argv[1], strerror(errno));
-    return 1;
     return 1;
   }
 
@@ -68,6 +68,16 @@ int main(int argc, char **argv) {
 
     if (t == TRAP_BREAKPOINT) {
       break; // clean stop
+    }
+    if (t == TRAP_ECALL_M) {
+      int code = 0;
+      ecall_result_t r = handle_ecall(&cpu, &code);
+      if (r == ECALL_HALT) {
+        cpu_dump(&cpu);
+        return code;
+      }
+      cpu.pc += 4; // handled syscall -> advance pc
+      continue;
     }
     if (t != TRAP_NONE) {
       fprintf(stderr, "trap %d at pc=0x%08x\n", t, cpu.pc);

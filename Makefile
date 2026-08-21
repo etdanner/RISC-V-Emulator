@@ -27,8 +27,8 @@ clean:
 run: $(TARGET)
 	./$(TARGET) $(ARGS)
 
-test: tests/bin/func.bin $(TARGET)
-	./$(TARGET) tests/bin/func.bin
+test: tests/bin/exit.bin $(TARGET)
+	./$(TARGET) tests/bin/exit.bin
 
 tests/bin/%.bin: tests/asm/%.s
 	@mkdir -p tests/bin

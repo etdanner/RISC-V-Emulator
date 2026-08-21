@@ -33,7 +33,7 @@ decoded_instr_t decode(uint32_t instr) {
     d.imm = (imm << 20) >> 20; // sign-extends by bit 11.
     break;
   }
-  case 0x63: // branch
+  case 0x63: { // branch
     uint32_t imm12 = bits(instr, 31, 31);
     uint32_t imm11 = bits(instr, 7, 7);
     uint32_t imm10_5 = bits(instr, 25, 30);
@@ -44,6 +44,20 @@ decoded_instr_t decode(uint32_t instr) {
 
     d.imm = (imm << 19) >> 19; // sign-extends by bit 12.
     break;
+  }
+
+  case 0x6F: { // jal
+    uint32_t imm20 = bits(instr, 31, 31);
+    uint32_t imm10_1 = bits(instr, 21, 30);
+    uint32_t imm11 = bits(instr, 20, 20);
+    uint32_t imm19_12 = bits(instr, 12, 19);
+
+    int32_t imm =
+        (imm20 << 20) | (imm19_12 << 12) | (imm11 << 11) | (imm10_1 << 1);
+
+    d.imm = (imm << 11) >> 11;
+    break;
+  }
   }
 
   return d;

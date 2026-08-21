@@ -176,7 +176,7 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
     }
     break; // end of load
 
-  case 0x63: {
+  case 0x63: { // branch instr
     bool taken = false;
     switch (d.funct3) {
     case 0x0: // beq
@@ -205,6 +205,22 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
       return TRAP_NONE; // taken only
     }
     break; // not taken -> shared pc += 4
+  }
+
+  case 0x6F:                           // jal
+    reg_write(cpu, d.rd, cpu->pc + 4); // save return addr
+    cpu->pc += d.imm;
+    return TRAP_NONE;
+
+  case 0x67: { // jalr
+    if (d.funct3 != 0x0) {
+      return TRAP_ILLEGAL_INSTR;
+    }
+    // read first incase rs1 and rd are the same regs
+    uint32_t target = (cpu->regs[d.rs1] + d.imm) & ~1u;
+    reg_write(cpu, d.rd, cpu->pc + 4); // then clobber rd safely
+    cpu->pc = target;
+    return TRAP_NONE;
   }
 
   case 0x73: // SYSTEM

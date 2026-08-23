@@ -30,10 +30,17 @@ run: $(TARGET)
 test: tests/bin/hello.bin $(TARGET)
 	./$(TARGET) tests/bin/hello.bin
 
-tests/bin/%.bin: tests/asm/%.s
+RVAS    := riscv64-unknown-elf-as
+RVLD    := riscv64-unknown-elf-ld
+RVCPY   := riscv64-unknown-elf-objcopy
+RVFLAGS := -march=rv32i -mabi=ilp32
+LDSCRIPT := link.ld
+
+tests/bin/%.bin: tests/asm/%.s $(LDSCRIPT)
 	@mkdir -p tests/bin
 	$(RVAS) $(RVFLAGS) $< -o $@.o
-	$(RVCPY) -O binary $@.o $@
-	@rm -f $@.o
+	$(RVLD) -T $(LDSCRIPT) -melf32lriscv $@.o -o $@.elf
+	$(RVCPY) -O binary $@.elf $@
+	@rm -f $@.o $@.elf
 
 .PHONY: clean debug run test

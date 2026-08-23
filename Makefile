@@ -27,8 +27,8 @@ clean:
 run: $(TARGET)
 	./$(TARGET) $(ARGS)
 
-test: tests/bin/hello.bin $(TARGET)
-	./$(TARGET) tests/bin/hello.bin
+test: tests/bin/testing.bin $(TARGET)
+	./$(TARGET) tests/bin/testing.bin
 
 RVAS    := riscv64-unknown-elf-as
 RVLD    := riscv64-unknown-elf-ld

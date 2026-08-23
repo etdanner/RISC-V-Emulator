@@ -79,6 +79,15 @@ int main(int argc, char **argv) {
       cpu.pc += 4; // handled syscall -> advance pc
       continue;
     }
+    if (t == TRAP_TOHOST) {
+      uint32_t code = cpu.tohost >> 1; // drops the "done" bit
+      if (code == 0) {
+        printf("PASS\n");
+      } else {
+        printf("FAIL test %u\n", code);
+      }
+      return (int)code; // 0 on pass, test number on fail
+    }
     if (t != TRAP_NONE) {
       fprintf(stderr, "trap %d at pc=0x%08x\n", t, cpu.pc);
       break; // fault

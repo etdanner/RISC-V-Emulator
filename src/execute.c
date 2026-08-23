@@ -119,7 +119,12 @@ trap_cause_t execute(cpu_t *cpu, decoded_instr_t d) {
       break;
     }
     case 0x2: { // sw
-      trap_cause_t t = mem_write32(cpu->regs[d.rs1] + d.imm, cpu->regs[d.rs2]);
+      uint32_t addr = cpu->regs[d.rs1] + d.imm;
+      if (addr == TOHOST_ADDR) {
+        cpu->tohost = cpu->regs[d.rs2];
+        return TRAP_TOHOST;
+      }
+      trap_cause_t t = mem_write32(addr, cpu->regs[d.rs2]);
       if (t != TRAP_NONE)
         return t;
       break;

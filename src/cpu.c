@@ -7,6 +7,7 @@
 void cpu_init(cpu_t *cpu) {
   cpu->pc = START_ADDR;
   memset(cpu->regs, 0, sizeof cpu->regs);
+  cpu->tohost = 0;
 }
 
 void reg_write(cpu_t *cpu, uint32_t reg, uint32_t val) {

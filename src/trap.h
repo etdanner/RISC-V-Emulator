@@ -1,7 +1,10 @@
 #ifndef TRAP_H
 #define TRAP_H
 
+#define TOHOST_ADDR 0x1000
+
 typedef enum {
+  TRAP_TOHOST = -2,            // to report pass/fail for test suite
   TRAP_NONE = -1,              // Executed correctly (nothing happened)
   TRAP_INSTR_MISALIGNED = 0,   // Target isn't 4-byte aligned
   TRAP_INSTR_ACCESS_FAULT = 1, // Failed instruction fetch

@@ -5,8 +5,8 @@ RISC-V binaries produced by the standard GNU toolchain and **passes all 40 of
 the official `rv32ui` `riscv-tests`**.
 
 The emulator implements the complete RV32I base integer instruction set, a
-spec-accurate trap/exception mechanism, a small Linux-style system-call
-layer, and it runs programs assembled and linked with `riscv64-unknown-elf-gcc`.
+spec-accurate trap/exception mechanism, and a small Linux-style system-call
+layer, and runs programs assembled and linked with `riscv64-unknown-elf-gcc`.
 
 ---
 
@@ -61,8 +61,8 @@ loop:
 
 Every instruction returns a `trap_cause_t`. `TRAP_NONE` means it executed
 cleanly; anything else would be an illegal instruction, a bad memory access, an
-`ecall`, or an `ebreak`. These traps flow up to the main loop, where it decides what to
-do with it. This keeps the execution core uniform: the loop main control loop, not the
+`ecall`, or an `ebreak`. These traps flow up to the main loop, which decides what
+to do with each one. This keeps the execution core uniform: the main loop, not the
 individual instructions, owns control-flow decisions like halting.
 
 ---
@@ -78,13 +78,13 @@ there are no cycles.
 | `memory`      | The address space. Bounds/alignment-checked byte access, private array.|
 | `decode`      | Pure function: 32 raw bits in, a `decoded_instr_t` of fields out.      |
 | `execute`     | Instruction semantics. Dispatches on the decoded fields.               |
-| `syscall`     | The guest↔host boundary: `ecall` handling (`exit`, `write`).           |
+| `syscall`     | The guest<->host boundary: `ecall` handling (`exit`, `write`).         |
 | `trap`        | Shared exception cause codes.                                          |
 | `main`        | Program loading, the fetch-decode-execute loop, trap routing.          |
 
 
 `decode` and `memory` are self-contained and independently testable.
-`execute` is the hub where the other pieces meet and everything flows toward
+`execute` is the hub where the other pieces meet, and everything flows toward
 `main`.
 
 ---
@@ -100,8 +100,8 @@ fields out, no CPU state touched. `execute` consumes that struct and applies the
 semantics. This mirrors how a real pipeline separates the stages and makes
 decode trivially unit-testable: a given 32-bit word must always produce the same
 fields, independent of machine state. There is deliberately no separate
-"classify the instruction" step as the combination of `opcode`/`funct3`/`funct7` already
-*is* the instruction's identity, so `execute` switches on it directly rather
+"classify the instruction" step, as the combination of `opcode`/`funct3`/`funct7`
+already *is* the instruction's identity, so `execute` switches on it directly rather
 than translating to an intermediate enum.
 
 ### Memory is encapsulated behind typed accessors
@@ -120,9 +120,9 @@ RISC-V exceptions (misaligned access, access fault, illegal instruction,
 the actual `mcause` cause codes from the privileged spec. The number the
 emulator returns *is* the number that would land in the `mcause` register. This
 keeps the memory layer ignorant of *why* it's being accessed. Functions return a
-generic fault, and the caller maps it to the load/store/fetch-specific cause keeping
-guest exceptions cleanly separated from host-side errors (a bad ROM file, a failed allocation),
-which are handled with ordinary C error handling in `main`.
+generic fault, and the caller maps it to the load/store/fetch-specific cause. This
+keeps guest exceptions cleanly separated from host-side errors (a bad ROM file, a
+failed allocation), which are handled with ordinary C error handling in `main`.
 
 ### Sign vs. zero extension lives in `execute`, not `memory`
 

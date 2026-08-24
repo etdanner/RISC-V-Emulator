@@ -50,4 +50,26 @@ tests/bin/%.bin: tests/riscv/rv32ui/%.S link.ld
 	riscv64-unknown-elf-objcopy -O binary $@.elf $@
 	@rm -f $@.elf
 
-.PHONY: clean debug run test
+# List of rv32ui tests to run (excludes fence_i and ma_data which need trap/CSR support)
+RVTESTS := add addi and andi auipc beq bge bgeu blt bltu bne \
+           jal jalr lb lbu lh lhu lui lw or ori sb sh simple \
+           sll slli slt slti sltiu sltu sra srai srl srli sub sw xor xori \
+           ld_st st_ld
+
+test-all: $(TARGET)
+	@pass=0; fail=0; \
+	for t in $(RVTESTS); do \
+		if $(MAKE) -s tests/bin/$$t.bin >/dev/null 2>&1; then \
+			if ./$(TARGET) tests/bin/$$t.bin >/dev/null 2>&1; then \
+				echo "PASS $$t"; pass=$$((pass+1)); \
+			else \
+				echo "FAIL $$t (exit $$?)"; fail=$$((fail+1)); \
+			fi; \
+		else \
+			echo "BUILD-FAIL $$t"; fail=$$((fail+1)); \
+		fi; \
+	done; \
+	echo "-----------------------------"; \
+	echo "passed: $$pass  failed: $$fail"
+
+.PHONY: clean debug run test test-all

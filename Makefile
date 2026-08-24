@@ -43,4 +43,11 @@ tests/bin/%.bin: tests/asm/%.s $(LDSCRIPT)
 	$(RVCPY) -O binary $@.elf $@
 	@rm -f $@.o $@.elf
 
+tests/bin/%.bin: tests/riscv/rv32ui/%.S link.ld
+	@mkdir -p tests/bin
+	riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -nostartfiles \
+	    -I tests/riscv -T link.ld $< -o $@.elf
+	riscv64-unknown-elf-objcopy -O binary $@.elf $@
+	@rm -f $@.elf
+
 .PHONY: clean debug run test
